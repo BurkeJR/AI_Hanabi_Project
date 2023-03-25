@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 import java.util.Scanner;
-
+import java.util.Arrays;
 /**
  * This is the only class you should edit.
  * @author You
@@ -9,6 +9,11 @@ import java.util.Scanner;
 public class Player {
 	// Add whatever variables you want. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
+
+	ArrayList<Integer> knownColors;
+	ArrayList<Integer> knownValues;
+	ArrayList<Boolean> hasHintedColor;
+	ArrayList<Boolean> hasHintedValue;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -17,7 +22,10 @@ public class Player {
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
-		
+		knownColors = new ArrayList<>(Arrays.asList(0,0,0,0,0)); //All unknown
+		knownValues = new ArrayList<>(Arrays.asList(0,0,0,0,0)); //All unknown
+		hasHintedColor = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
+		hasHintedValue = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 	}
 	
 	/**
@@ -52,7 +60,7 @@ public class Player {
 	 * @param draw The card she drew to replace it; null, if the deck was empty.
 	 * @param drawIndex The index to which she drew the new card.
 	 * @param finalHand The hand your partner ended with after playing.
-	 * @param wasLegalPLay Whether the play was legal or not.
+	 * @param wasLegalPlay Whether the play was legal or not.
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
@@ -78,7 +86,10 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		
+		for (Integer i : indices) {
+			knownColors.set(i, color);
+		}
+
 	}
 	
 	/**
@@ -89,7 +100,9 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		
+		for (Integer i : indices) {
+			knownValues.set(i, number);
+		}
 	}
 	
 	/**
