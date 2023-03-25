@@ -16,11 +16,13 @@ public class Player {
 	ArrayList<Boolean> hasHintedValue;
 	ArrayList<Integer> playableIndexes;
 	ArrayList<Integer> discardableIndexes;
-
 	ArrayList<Card> deck;
 
 	boolean wasHinted;
+	boolean numHint;
+	boolean colorHint;
 	int numChangedByHint;
+	int turn;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -34,6 +36,8 @@ public class Player {
 		hasHintedColor = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 		hasHintedValue = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 		wasHinted = false;
+		numHint = false;
+		colorHint = false;
 		numChangedByHint = 0;
 		playableIndexes = new ArrayList<>();
 		discardableIndexes = new ArrayList<>();
@@ -53,6 +57,8 @@ public class Player {
 			deck.add(new Card(i, 4));
 			deck.add(new Card(i, 5));
 		}
+
+		turn = 0; //Set turn to 0
 	}
 	
 	/**
@@ -126,6 +132,7 @@ public class Player {
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		numChangedByHint = indices.size();
 		wasHinted = true;
+		colorHint = true;
 		for (Integer i : indices) {
 			knownColors.set(i, color);
 		}
@@ -142,6 +149,7 @@ public class Player {
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		numChangedByHint = indices.size();
 		wasHinted = true;
+		numHint = true;
 		for (Integer i : indices) {
 			knownValues.set(i, number);
 		}
@@ -167,7 +175,50 @@ public class Player {
 	 *     This command informs your partner which of his cards have the chosen color. An error will result if none of
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
-	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+	public String ask(int yourHandSize, Hand partnerHand, Board boardState) throws Exception {
+		if (turn == 0) {
+			//Only runs on first turn, removes all cards from our deck in partner's hand
+			for (int i = 0; i < 5; i++) {
+				deck.remove(partnerHand.get(i));
+			}
+		}
+
+		if (wasHinted && numChangedByHint == 1) {
+			//Was hinted only one color or value
+			if (numHint) {
+				//TODO: need what index was hinted
+				//Both should return a Play string if playable
+			}
+			if (colorHint) {
+				//TODO: need what index was hinted
+				//Both should return a Play string if playable
+			}
+
+			wasHinted = false;
+			numHint = false;
+			colorHint = false;
+			numChangedByHint = 0;
+		}
+		if (playableIndexes.size() != 0) {
+			//Play from playables
+		}
+
+		//TODO: check for any infrences (maybe done when we get hints or they play) so we can just use list above
+
+
+		//TODO: check for hintable cards\
+
+		if (discardableIndexes.size() != 0) {
+			//Discard from here
+		}
+
+
+
+
+
+
+
+		turn++; //Iterate so turn == 0 only once
 		// Provided for testing purposes only; delete.
 		// Your method should construct and return a String without user input.
 		return scn.nextLine();
