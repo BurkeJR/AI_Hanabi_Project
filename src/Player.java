@@ -14,6 +14,8 @@ public class Player {
 	ArrayList<Integer> knownValues;
 	ArrayList<Boolean> hasHintedColor;
 	ArrayList<Boolean> hasHintedValue;
+	ArrayList<Integer> playableIndexes;
+	ArrayList<Integer> discardableIndexes;
 
 	boolean wasHinted;
 	int numChangedByHint;
@@ -31,6 +33,8 @@ public class Player {
 		hasHintedValue = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 		wasHinted = false;
 		numChangedByHint = 0;
+		playableIndexes = new ArrayList<>();
+		discardableIndexes = new ArrayList<>();
 	}
 	
 	/**
