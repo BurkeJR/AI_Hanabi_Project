@@ -14,6 +14,9 @@ public class Player {
 	ArrayList<Integer> knownValues;
 	ArrayList<Boolean> hasHintedColor;
 	ArrayList<Boolean> hasHintedValue;
+
+	boolean wasHinted;
+	int numChangedByHint;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -26,6 +29,8 @@ public class Player {
 		knownValues = new ArrayList<>(Arrays.asList(0,0,0,0,0)); //All unknown
 		hasHintedColor = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 		hasHintedValue = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
+		wasHinted = false;
+		numChangedByHint = 0;
 	}
 	
 	/**
@@ -86,6 +91,8 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+		numChangedByHint = indices.size();
+		wasHinted = true;
 		for (Integer i : indices) {
 			knownColors.set(i, color);
 		}
@@ -100,6 +107,8 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+		numChangedByHint = indices.size();
+		wasHinted = true;
 		for (Integer i : indices) {
 			knownValues.set(i, number);
 		}
