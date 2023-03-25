@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Arrays;
 /**
@@ -14,8 +15,8 @@ public class Player {
 	ArrayList<Integer> knownValues;
 	ArrayList<Boolean> hasHintedColor;
 	ArrayList<Boolean> hasHintedValue;
-	ArrayList<Integer> playableIndexes;
-	ArrayList<Integer> discardableIndexes;
+	HashSet<Integer> playableIndexes;
+	HashSet<Integer> discardableIndexes;
 	ArrayList<Card> deck;
 
 	boolean wasHinted;
@@ -31,7 +32,7 @@ public class Player {
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
-		knownColors = new ArrayList<>(Arrays.asList(0,0,0,0,0)); //All unknown
+		knownColors = new ArrayList<>(Arrays.asList(-1,-1,-1,-1,-1)); //All unknown
 		knownValues = new ArrayList<>(Arrays.asList(0,0,0,0,0)); //All unknown
 		hasHintedColor = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
 		hasHintedValue = new ArrayList<>(Arrays.asList(false,false,false,false,false)); //No hints given
@@ -39,8 +40,8 @@ public class Player {
 		numHint = false;
 		colorHint = false;
 		numChangedByHint = 0;
-		playableIndexes = new ArrayList<>();
-		discardableIndexes = new ArrayList<>();
+		playableIndexes = new HashSet<>();
+		discardableIndexes = new HashSet<>();
 
 		//Make deck for counting cards
 		deck = new ArrayList<>();
@@ -183,6 +184,8 @@ public class Player {
 			}
 		}
 
+		infer(boardState);
+
 		if (wasHinted && numChangedByHint == 1) {
 			//Was hinted only one color or value
 			if (numHint) {
@@ -222,6 +225,84 @@ public class Player {
 		// Provided for testing purposes only; delete.
 		// Your method should construct and return a String without user input.
 		return scn.nextLine();
+	}
+
+
+	/**
+	 * Checks for any cards that are discardable
+	 * Also checks if we guarantee we can play a card
+	 * Call every time we wish to know things
+	 * Alters playableIndexes and discardableIndexes
+	 * Checks if any valued card in hand is less than minimum tableau value
+	 * Also looks at cards that we know color of, and
+	 *
+	 * @param boardState Board to infer based off of
+	 */
+	private void infer(Board boardState) {
+		playableIndexes.clear();
+		discardableIndexes.clear();
+
+		int minTableau = 5;
+		for (Integer i : boardState.tableau) {
+			minTableau = i < minTableau ? i : minTableau;
+		}
+		//Get minimum value in tableau
+
+
+		//Adds index of all values where the known value is <= minimum tableau value
+		for (int i = 0; i < knownValues.size(); i++) {
+			if (knownValues.get(i) == 0) {
+				continue;
+			}
+			if (knownValues.get(i) <= minTableau) {
+				discardableIndexes.add(i);
+			}
+		}
+
+
+		//Goes through each color on tableau
+		//Loops through what we know of hand
+		//If card with color
+		for (int i = 0; i < boardState.tableau.size(); i++) {
+			if (!knownColors.contains(i)) {
+				continue;
+			}
+
+			//Loop through what we know of our hand
+			for (int j = 0; j < knownColors.size(); j++) {
+				if (knownColors.get(j) != i) {
+					continue;
+				}
+				//Same color
+
+				if (knownValues.get(j) == -1) {
+					//We only know color
+					continue;
+				}
+
+				if (knownValues.get(j) == boardState.tableau.get(i) + 1) {
+					//Card is 1 greater than corresponding value in tableau
+					playableIndexes.add(j);
+					continue;
+				}
+
+				if (knownValues.get(j) <= boardState.tableau.get(i)) {
+					//Card is less than or equal to corresponding stack
+					//So is discard-able
+					discardableIndexes.add(j);
+				}
+			}
+		}
+
+
+
+
+
+
+
+
+
+
 	}
 
 }
