@@ -190,6 +190,7 @@ public class Player {
 				deck.remove(partnerHand.get(i));
 			}
 		}
+		turn++;
 
 		if (wasHinted && numCardsChangedByHint == 1) {
 			//Was hinted only one color or value
@@ -210,7 +211,7 @@ public class Player {
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
-			return "PLAY " + playableIndexes.get(0) + "4";
+			return "PLAY " + playableIndexes.get(0) + " 4";
 			//Just play nearest thing in playables
 		}
 
@@ -221,17 +222,25 @@ public class Player {
 
 		if (discardableIndexes.size() != 0) {
 			//Discard from here
-			return "DISCARD" + discardableIndexes.get(0) + "4";
+			return "DISCARD" + discardableIndexes.get(0) + " 4";
 			//Discard nearest thing in discardables
 		}
 
 
+		//TODO: Check if we should gamble
 
 
 
 
 
-		turn++; //Iterate so turn == 0 only once
+		//Discard first non 5 card
+		for (int i = 0; i < knownValues.size(); i++) {
+			if (knownValues.get(i) == 5) {
+				continue;
+			}
+			return "DISCARD " + i + " 4";
+		}
+
 		// Provided for testing purposes only; delete.
 		// Your method should construct and return a String without user input.
 		return scn.nextLine();
