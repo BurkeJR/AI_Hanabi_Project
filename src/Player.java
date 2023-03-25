@@ -79,7 +79,7 @@ public class Player {
 		hasHintedColor.add(false);
 
 
-		deck.remove(draw); //Removes card they drew from possible unkowns
+		deck.remove(draw); //Removes card they drew from possible unknowns
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class Player {
 		hasHintedValue.add(false);
 		hasHintedColor.add(false);
 
-		deck.remove(draw); //Removes card they drew from possible unkowns
+		deck.remove(draw); //Removes card they drew from possible unknowns
 	}
 	
 	/**
@@ -182,12 +182,15 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) throws Exception {
+		infer(boardState);
+
 		if (turn == 0) {
 			//Only runs on first turn, removes all cards from our deck in partner's hand
 			for (int i = 0; i < 5; i++) {
 				deck.remove(partnerHand.get(i));
 			}
 		}
+		turn++;
 
 		if (wasHinted && numCardsChangedByHint == 1) {
 			//Was hinted only one color or value
@@ -240,12 +243,20 @@ public class Player {
 		}
 
 
+		//TODO: Check if we should gamble
 
 
 
 
 
-		turn++; //Iterate so turn == 0 only once
+		//Discard first non 5 card
+		for (int i = 0; i < knownValues.size(); i++) {
+			if (knownValues.get(i) == 5) {
+				continue;
+			}
+			return "DISCARD " + i + " 4";
+		}
+
 		// Provided for testing purposes only; delete.
 		// Your method should construct and return a String without user input.
 		return scn.nextLine();
