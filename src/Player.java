@@ -15,8 +15,8 @@ public class Player {
 	ArrayList<Integer> knownValues;
 	ArrayList<Boolean> hasHintedColor;
 	ArrayList<Boolean> hasHintedValue;
-	HashSet<Integer> playableIndexes;
-	HashSet<Integer> discardableIndexes;
+	ArrayList<Integer> playableIndexes;
+	ArrayList<Integer> discardableIndexes;
 	ArrayList<Card> deck;
 
 	boolean wasHinted, numHint, colorHint;
@@ -37,10 +37,10 @@ public class Player {
 		wasHinted = false;
 		numHint = false;
 		colorHint = false;
-		playableIndexes = new HashSet<>();
-		discardableIndexes = new HashSet<>();
 		numCardsChangedByHint = 0;
-		indexOfSingleCardHint = 0;
+		indexOfSingleCardHint = -1;
+		playableIndexes = new ArrayList<>();
+		discardableIndexes = new ArrayList<>();
 
 		//Make deck for counting cards
 		deck = new ArrayList<>();
@@ -208,15 +208,19 @@ public class Player {
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
+			return "PLAY " + playableIndexes.get(0) + "4";
+			//Just play nearest thing in playables
 		}
 
 		//TODO: check for any infrences (maybe done when we get hints or they play) so we can just use list above
 
 
-		//TODO: check for hintable cards\
+		//TODO: check for hintable cards
 
 		if (discardableIndexes.size() != 0) {
 			//Discard from here
+			return "DISCARD" + discardableIndexes.get(0) + "4";
+			//Discard nearest thing in discardables
 		}
 
 
@@ -297,25 +301,6 @@ public class Player {
 				}
 			}
 		}
-	}
-
-
-	/**
-	 * Returns true if the color is not already completed
-	 * @param color
-	 * @return
-	 */
-	private boolean safeToPlayByColor(int color) {
-		return knownColors.get(color) != 5;
-	}
-
-	/**
-	 * Returns true if we have at least one color in the tableau that the given value can be played on
-	 * @param value
-	 * @return
-	 */
-	private boolean safeToPlayByValue(int value) {
-		return true;
 	}
 
 }
