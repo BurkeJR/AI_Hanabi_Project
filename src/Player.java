@@ -45,6 +45,11 @@ public class Player {
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
+		hasHintedValue.remove(disIndex);
+		hasHintedColor.remove(disIndex);
+		hasHintedValue.add(false);
+		hasHintedColor.add(false);
+
 		
 	}
 	
@@ -70,7 +75,10 @@ public class Player {
 	 */
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
 			Hand finalHand, boolean wasLegalPlay, Board boardState) {
-		
+		hasHintedValue.remove(playIndex);
+		hasHintedColor.remove(playIndex);
+		hasHintedValue.add(false);
+		hasHintedColor.add(false);
 	}
 	
 	/**
