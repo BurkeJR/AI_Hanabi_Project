@@ -17,6 +17,8 @@ public class Player {
 	ArrayList<Integer> playableIndexes;
 	ArrayList<Integer> discardableIndexes;
 
+	ArrayList<Card> deck;
+
 	boolean wasHinted;
 	int numChangedByHint;
 	
@@ -35,6 +37,22 @@ public class Player {
 		numChangedByHint = 0;
 		playableIndexes = new ArrayList<>();
 		discardableIndexes = new ArrayList<>();
+
+		//Make deck for counting cards
+		deck = new ArrayList<>();
+		// Loads deck with three of each 1, two of each 2-3-4, and one of each 5.
+		for (int i = 0; i < 5; i++) {
+			deck.add(new Card(i, 1));
+			deck.add(new Card(i, 1));
+			deck.add(new Card(i, 1));
+			deck.add(new Card(i, 2));
+			deck.add(new Card(i, 2));
+			deck.add(new Card(i, 3));
+			deck.add(new Card(i, 3));
+			deck.add(new Card(i, 4));
+			deck.add(new Card(i, 4));
+			deck.add(new Card(i, 5));
+		}
 	}
 	
 	/**
@@ -54,7 +72,8 @@ public class Player {
 		hasHintedValue.add(false);
 		hasHintedColor.add(false);
 
-		
+
+		deck.remove(draw); //Removes card they drew from possible unkowns
 	}
 	
 	/**
@@ -63,7 +82,7 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
-		
+		deck.remove(discard);
 	}
 	
 	/**
@@ -83,6 +102,8 @@ public class Player {
 		hasHintedColor.remove(playIndex);
 		hasHintedValue.add(false);
 		hasHintedColor.add(false);
+
+		deck.remove(draw); //Removes card they drew from possible unkowns
 	}
 	
 	/**
@@ -92,7 +113,7 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourPlay(Card play, boolean wasLegalPlay, Board boardState) {
-		
+		deck.remove(play);
 	}
 	
 	/**
