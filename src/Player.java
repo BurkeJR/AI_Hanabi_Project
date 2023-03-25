@@ -193,10 +193,26 @@ public class Player {
 			//Was hinted only one color or value
 			if (colorHint) {
 				int color = knownColors.get(indexOfSingleCardHint);
-				
+				if (boardState.tableau.get(color) != 5) {
+					// if the color isn't complete, then play
+					return makePlayMessage(indexOfSingleCardHint);
+				}
+				else {
+					return makeDiscardMessage(indexOfSingleCardHint);
+				}
 			}
 			if (numHint) {
 				int value = knownValues.get(indexOfSingleCardHint);
+				int playableSpots = 0;
+				for (int spot : boardState.tableau) {
+					playableSpots += (spot == value - 1) ? 1 : 0;
+				}
+				if (playableSpots > 0) {
+					return makePlayMessage(indexOfSingleCardHint);
+				}
+				else {
+					return makeDiscardMessage(indexOfSingleCardHint);
+				}
 			}
 
 			wasHinted = false;
@@ -208,7 +224,7 @@ public class Player {
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
-			return "PLAY " + playableIndexes.get(0) + "4";
+			return makePlayMessage(playableIndexes.get(0));
 			//Just play nearest thing in playables
 		}
 
@@ -219,7 +235,7 @@ public class Player {
 
 		if (discardableIndexes.size() != 0) {
 			//Discard from here
-			return "DISCARD" + discardableIndexes.get(0) + "4";
+			return makeDiscardMessage(discardableIndexes.get(0));
 			//Discard nearest thing in discardables
 		}
 
@@ -301,6 +317,14 @@ public class Player {
 				}
 			}
 		}
+	}
+
+	private String makePlayMessage(int x) {
+		return "PLAY " + x + " " + (knownColors.size() - 1);
+	}
+
+	private String makeDiscardMessage(int x) {
+		return "DISCARD " + x + " " + (knownColors.size() - 1);
 	}
 
 }
