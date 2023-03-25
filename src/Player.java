@@ -19,10 +19,8 @@ public class Player {
 	HashSet<Integer> discardableIndexes;
 	ArrayList<Card> deck;
 
-	boolean wasHinted;
-	boolean numHint;
-	boolean colorHint;
-	int numChangedByHint;
+	boolean wasHinted, numHint, colorHint;
+	int numCardsChangedByHint, indexOfSingleCardHint;
 	int turn;
 	
 	// Delete this once you actually write your own version of the class.
@@ -39,9 +37,10 @@ public class Player {
 		wasHinted = false;
 		numHint = false;
 		colorHint = false;
-		numChangedByHint = 0;
 		playableIndexes = new HashSet<>();
 		discardableIndexes = new HashSet<>();
+		numCardsChangedByHint = 0;
+		indexOfSingleCardHint = 0;
 
 		//Make deck for counting cards
 		deck = new ArrayList<>();
@@ -131,9 +130,12 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		numChangedByHint = indices.size();
+		numCardsChangedByHint = indices.size();
 		wasHinted = true;
 		colorHint = true;
+		if (numCardsChangedByHint == 1) {
+			indexOfSingleCardHint = indices.get(0);
+		}
 		for (Integer i : indices) {
 			knownColors.set(i, color);
 		}
@@ -148,9 +150,12 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		numChangedByHint = indices.size();
+		numCardsChangedByHint = indices.size();
 		wasHinted = true;
 		numHint = true;
+		if (numCardsChangedByHint == 1) {
+			indexOfSingleCardHint = indices.get(0);
+		}
 		for (Integer i : indices) {
 			knownValues.set(i, number);
 		}
@@ -184,24 +189,23 @@ public class Player {
 			}
 		}
 
-		infer(boardState);
-
-		if (wasHinted && numChangedByHint == 1) {
+		if (wasHinted && numCardsChangedByHint == 1) {
 			//Was hinted only one color or value
-			if (numHint) {
-				//TODO: need what index was hinted
-				//Both should return a Play string if playable
-			}
 			if (colorHint) {
-				//TODO: need what index was hinted
-				//Both should return a Play string if playable
+				int color = knownColors.get(indexOfSingleCardHint);
+				
+			}
+			if (numHint) {
+				int value = knownValues.get(indexOfSingleCardHint);
 			}
 
 			wasHinted = false;
 			numHint = false;
 			colorHint = false;
-			numChangedByHint = 0;
+			indexOfSingleCardHint = -1; // this should never be accessed when it is -1, just used for testing
+			numCardsChangedByHint = 0;
 		}
+
 		if (playableIndexes.size() != 0) {
 			//Play from playables
 		}
@@ -293,16 +297,25 @@ public class Player {
 				}
 			}
 		}
+	}
 
 
+	/**
+	 * Returns true if the color is not already completed
+	 * @param color
+	 * @return
+	 */
+	private boolean safeToPlayByColor(int color) {
+		return knownColors.get(color) != 5;
+	}
 
-
-
-
-
-
-
-
+	/**
+	 * Returns true if we have at least one color in the tableau that the given value can be played on
+	 * @param value
+	 * @return
+	 */
+	private boolean safeToPlayByValue(int value) {
+		return true;
 	}
 
 }
