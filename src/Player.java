@@ -633,7 +633,7 @@ public class Player {
 			hasHintedValue.set(partnerHandVals.indexOf(1), true);
 			return numHintMsg(1);
 		} else if (discardTwos && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
-			hasHintedValue.set(partnerHandVals.indexOf(1), true);
+			hasHintedValue.set(partnerHandVals.indexOf(2), true);
 			return numHintMsg(2);
 		} else if (discardThrees && !hasHintedValue.get(partnerHandVals.indexOf(3))) {
 			hasHintedValue.set(partnerHandVals.indexOf(3), true);
