@@ -271,8 +271,10 @@ public class Player {
 
 
 		//TODO: Check if we should gamble
-		if (shouldGamble(boardState)) {
-			int index = gamble(boardState);
+		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
+
+		if (shouldGamble(boardState, playable)) {
+			int index = gamble(playable);
 			knownColors.remove(index);
 			knownValues.remove(index);
 			knownValues.add(0);
@@ -368,7 +370,7 @@ public class Player {
 		}
 	}
 
-	private boolean shouldGamble(Board boardState) {
+	private boolean shouldGamble(Board boardState, ArrayList<Card> playable) {
 		if (boardState.numFuses <= 1) {
 			// we don't have enough lives to gamble
 			return false;
@@ -384,7 +386,6 @@ public class Player {
 		}
 
 		// get proportion of playable cards that will give us points to total playable cards
-		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
 		int total = boardState.deckSize + 10; // 10 because each player has 5 cards
 
 		// if we have at least a 50% chance of getting a point from a guess, then gamble
