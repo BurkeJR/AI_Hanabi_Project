@@ -17,6 +17,7 @@ public class Player {
 	ArrayList<Boolean> hasHintedValue;
 	ArrayList<Integer> playableIndexes;
 	ArrayList<Integer> discardableIndexes;
+	ArrayList<Integer> lastHintIndices;
 	ArrayList<Card> deck;
 
 	boolean wasHinted, numHint, colorHint;
@@ -41,6 +42,7 @@ public class Player {
 		indexOfSingleCardHint = -1;
 		playableIndexes = new ArrayList<>();
 		discardableIndexes = new ArrayList<>();
+		lastHintIndices = new ArrayList<>();
 
 		//Make deck for counting cards
 		deck = new ArrayList<>();
@@ -135,6 +137,8 @@ public class Player {
 		colorHint = true;
 		if (numCardsChangedByHint == 1) {
 			indexOfSingleCardHint = indices.get(0);
+		} else {
+			lastHintIndices = indices;
 		}
 		for (Integer i : indices) {
 			knownColors.set(i, color);
@@ -155,6 +159,8 @@ public class Player {
 		numHint = true;
 		if (numCardsChangedByHint == 1) {
 			indexOfSingleCardHint = indices.get(0);
+		} else {
+			lastHintIndices = indices;
 		}
 		for (Integer i : indices) {
 			knownValues.set(i, number);
@@ -193,13 +199,13 @@ public class Player {
 		turn++;
 
 		if (wasHinted && numCardsChangedByHint == 1) {
-			wasHinted = false;
-			numCardsChangedByHint = 0;
-			int index = indexOfSingleCardHint;
-			indexOfSingleCardHint = -1;
+			wasHinted = false; //reset val
+			numCardsChangedByHint = 0; //reset val
+			int index = indexOfSingleCardHint; //store val locally, reset class
+			indexOfSingleCardHint = -1; //reset val
 			//Was hinted only one color or value
 			if (colorHint) {
-				colorHint = false;
+				colorHint = false; //reset val
 				//Remove hinted number from known Cards and add replacement to back of hand
 				int color = knownColors.get(index);
 
@@ -217,7 +223,7 @@ public class Player {
 				}
 			}
 			if (numHint) {
-				numHint = false;
+				numHint = false; //reset val
 				int value = knownValues.get(index);
 
 				knownColors.remove(index);
@@ -236,7 +242,50 @@ public class Player {
 					return discardMsg(index);
 				}
 			}
+		} else if (wasHinted && boardState.numFuses > 1) {
+			//Hinted more than 1 card and can afford to lose a life
+			wasHinted = false;
+			int indexHinted = lastHintIndices.get(0);
+
+			if (colorHint) {
+				//color hint of more than 1 card
+				colorHint = false;
+
+				if (boardState.tableau.get(indexHinted) != 5) {
+					knownColors.remove(indexHinted);
+					knownValues.remove(indexHinted);
+					knownValues.add(0);
+					knownColors.add(-1);
+					return playMsg(indexHinted);
+				}
+
+			} else if (numHint) {
+				//number hint of more than 1 card
+				numHint = false;
+
+				int value = knownValues.get(indexHinted);
+
+				int playableSpots = 0;
+				for (int spot : boardState.tableau) {
+					playableSpots += (spot == value - 1) ? 1 : 0;
+				}
+
+				knownColors.remove(indexHinted);
+				knownValues.remove(indexHinted);
+				knownValues.add(0);
+				knownColors.add(-1);
+
+				if (playableSpots > 0) {
+					return playMsg(indexHinted);
+				}
+				else {
+					return discardMsg(indexHinted);
+				}
+			}
 		}
+
+
+
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
@@ -254,6 +303,7 @@ public class Player {
 
 
 
+
 		//TODO: check for hintable cards
 
 		String hint = hint(boardState, partnerHand);//Return an empty string if no hint to give
@@ -263,7 +313,7 @@ public class Player {
 		}
 
 
-		if (discardableIndexes.size() != 0) {
+		if (discardableIndexes.size() != 0 && boardState.numHints < 6) {
 			//Discard from here
 			int index = discardableIndexes.get(0);
 			knownColors.remove(index);
@@ -491,23 +541,27 @@ public class Player {
 	}
 
 	private String playMsg(int x) {
+		System.out.println("PLAY " + x + " " + (knownColors.size() - 1));
 		return "PLAY " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String discardMsg(int x) {
+		System.out.println("DISCARD " + x + " " + (knownColors.size() - 1));
 		return "DISCARD " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String colorHintMsg(int x) {
+		System.out.println("COLORHINT " + x);
 		return "COLORHINT " + x;
 	}
 
 	private String numHintMsg(int x) {
+		System.out.println("NUMBERHINT " + x);
 		return "NUMBERHINT " + x;
 	}
 
 	private String hint(Board boardState, Hand partnerHand) throws Exception {
-		if (boardState.numFuses < 2 || boardState.numHints == 0) {
+		if (boardState.numFuses < 1 || boardState.numHints == 0) {
 			return "";
 		}
 
@@ -543,7 +597,11 @@ public class Player {
 		boolean playAllTwos = minTableau == maxTableau && minTableau == 1;
 		boolean playAllThrees = minTableau == maxTableau && minTableau == 2;
 
+		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
+			return numHintMsg(5);
+		}
 
+		//Hint for all of one number
 		if (playAllOnes && partnerHandVals.contains(1) && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
 			return numHintMsg(1);
 		} else if (playAllTwos && partnerHandVals.contains(2) && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
@@ -552,12 +610,7 @@ public class Player {
 			return numHintMsg(3);
 		}
 
-		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
-			return numHintMsg(5);
-		}
-
 		int index = hasPlayableCard(partnerHandCards, boardState);
-
 
 		//If can play card, check if have only 1;
 		if (index != -1) {
@@ -578,7 +631,25 @@ public class Player {
 		}
 
 
+		if (hasHintedValue.contains(true)) {
+			//Have hinted values, need to hint colors
+			return colorHintMsg(partnerHandColors.get(hasHintedValue.indexOf(true)));
+		} else if (hasHintedColor.contains(true)) {
+			//have hinted colors, need to hint values
+			return numHintMsg(partnerHandVals.get(hasHintedColor.indexOf(true)));
+		}
 
+		Tuple tuple = getBigHint(partnerHandVals, partnerHandColors);
+
+		boolean hintHum = tuple.hintNum;
+		int biggestHint = tuple.biggestHint;
+		int biggestHintIndex = tuple.biggestHintIndex;
+
+		if (hintHum && biggestHint > 2 && !hasHintedValue.get(biggestHintIndex)) {
+			return numHintMsg(partnerHandVals.get(biggestHintIndex));
+		} else if (biggestHint > 2 && !hasHintedColor.get(biggestHintIndex)) {
+			return colorHintMsg(partnerHandColors.get(biggestHintIndex));
+		}
 
 
 		return "";
@@ -599,6 +670,52 @@ public class Player {
 		}
 
 		return -1;
+	}
+
+	private Tuple getBigHint(ArrayList<Integer> partnerHandVals, ArrayList<Integer> partnerHandColors) {
+		int[] valsSize = {0,0,0,0,0};
+		int[] colorSize = {0,0,0,0,0};
+
+		for (int i = 0; i < partnerHandColors.size(); i++) {
+			valsSize[partnerHandVals.get(i) - 1]++;
+			colorSize[partnerHandColors.get(i)]++;
+		}
+
+		int maxVal = -1;
+		int maxValIndex = 0;
+		int maxColor = -1;
+		int maxColorIndex = 0;
+
+		for (int i =0; i < valsSize.length; i++) {
+			if (valsSize[i] > maxVal) {
+				maxVal = valsSize[i];
+				maxValIndex = i;
+			}
+			if (colorSize[i] > maxColor) {
+				maxColor = colorSize[i];
+				maxColorIndex = i;
+			}
+		}
+
+		if (maxColor > maxVal) {
+			return new Tuple(false, maxVal, maxColorIndex);
+		}
+		return new Tuple(true, maxColor, maxValIndex);
+
+
+	}
+
+
+	private class Tuple {
+		public boolean hintNum;
+		public int biggestHint;
+
+		public int biggestHintIndex;
+		public Tuple (boolean hintNum, int biggestHint, int biggestHintIndex) {
+			this.hintNum = hintNum;
+			this.biggestHint = biggestHint;
+			this.biggestHintIndex = biggestHintIndex;
+		}
 	}
 
 }
