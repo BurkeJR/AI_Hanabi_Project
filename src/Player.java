@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 /**
  * This is the only class you should edit.
  * @author You
@@ -348,8 +350,13 @@ public class Player {
 		}
 
 		// get proportion of playable cards that will give us points to total playable cards
+		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
+		int total = boardState.deckSize + 10; // 10 because each player has 5 cards
 
 		// if we have at least a 50% chance of getting a point from a guess, then gamble
+		if (playable.size()/total >= 0.5) {
+			gamble(playable);
+		}
 
 		return false;
 	}
@@ -357,14 +364,29 @@ public class Player {
 	/** 
 	 * returns the index of the card we should play on a gamble
 	 */
-	private int gamble(Board boardState) {
-		// get list of playable cards that will give us a point 
-
-		// find the chance of that each of our cards could be one of these cards 
+	private int gamble(ArrayList<Card> playable) {
+		// find the chance of that each of our cards could be one of the playable cards 
 
 		// play the card with the highest chance. if tied, play the newest card (the one closer to the end)
 
 		return 0;
+	}
+
+	private ArrayList<Card> getPossiblePlayableCards(Board boardState) {
+		ArrayList<Card> playable = new ArrayList<>();
+
+		for (int color = 0; color < 5; color++) {
+			// get the cards that can be played on each color
+			Card card = new Card(color, boardState.tableau.get(color) + 1);
+			int count = Collections.frequency(deck, card);
+
+			for (int i = 0; i < count; i++) {
+				// add the card the number of times it is in the remaining deck
+				playable.add(card);
+			}
+		}
+
+		return playable;
 	}
 
 	private String playMsg(int x) {
