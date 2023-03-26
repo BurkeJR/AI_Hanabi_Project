@@ -277,7 +277,7 @@ public class Player {
 		}
 
 
-		if (discardableIndexes.size() != 0 && boardState.numHints < 6) {
+		if (discardableIndexes.size() != 0 && boardState.numHints < 4) {
 			//Discard from here
 			int index = discardableIndexes.get(0);
 			knownColors.remove(index);
@@ -306,6 +306,14 @@ public class Player {
 		for (int i = 0; i < knownValues.size(); i++) {
 			if (knownValues.get(i) == 5) {
 				continue;
+			}
+			if (knownValues.get(i) != 0 && knownColors.get(i) != -1) {
+				//We know both of this ones values
+				if (deck.contains(new Card(knownColors.get(i), knownValues.get(i)))) {
+					//Discard deck already contains this Card
+					//So skip it
+					continue;
+				}
 			}
 			knownColors.remove(i);
 			knownValues.remove(i);
