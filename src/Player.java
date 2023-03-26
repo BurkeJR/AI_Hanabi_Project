@@ -282,11 +282,6 @@ public class Player {
 					return discardMsg(indexHinted);
 				}
 			}
-		} else {
-			//Reset bools
-			wasHinted = false;
-			numHint = false;
-			colorHint = false;
 		}
 
 
@@ -308,6 +303,7 @@ public class Player {
 
 
 
+
 		//TODO: check for hintable cards
 
 		String hint = hint(boardState, partnerHand);//Return an empty string if no hint to give
@@ -317,7 +313,7 @@ public class Player {
 		}
 
 
-		if (discardableIndexes.size() != 0) {
+		if (discardableIndexes.size() != 0 && boardState.numHints < 6) {
 			//Discard from here
 			int index = discardableIndexes.get(0);
 			knownColors.remove(index);
@@ -536,7 +532,11 @@ public class Player {
 		boolean playAllTwos = minTableau == maxTableau && minTableau == 1;
 		boolean playAllThrees = minTableau == maxTableau && minTableau == 2;
 
+		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
+			return numHintMsg(5);
+		}
 
+		//Hint for all of one number
 		if (playAllOnes && partnerHandVals.contains(1) && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
 			return numHintMsg(1);
 		} else if (playAllTwos && partnerHandVals.contains(2) && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
@@ -545,12 +545,7 @@ public class Player {
 			return numHintMsg(3);
 		}
 
-		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
-			return numHintMsg(5);
-		}
-
 		int index = hasPlayableCard(partnerHandCards, boardState);
-
 
 		//If can play card, check if have only 1;
 		if (index != -1) {
@@ -569,6 +564,18 @@ public class Player {
 				return colorHintMsg(partnerHandColors.get(index));
 			}
 		}
+
+
+		if (hasHintedValue.contains(true)) {
+			//Have hinted values, need to hint colors
+			return colorHintMsg(partnerHandColors.get(hasHintedValue.indexOf(true)));
+		} else if (hasHintedColor.contains(true)) {
+			//have hinted colors, need to hint values
+			return numHintMsg(partnerHandVals.get(hasHintedColor.indexOf(true)));
+		}
+
+
+
 
 
 
