@@ -289,14 +289,14 @@ public class Player {
 		//TODO: Check if we should gamble
 		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
 
-		// if (shouldGamble(boardState, playable)) {
-		// 	int index = gamble(playable);
-		// 	knownColors.remove(index);
-		// 	knownValues.remove(index);
-		// 	knownValues.add(0);
-		// 	knownColors.add(-1);
-		// 	return playMsg(index);
-		// }
+		if (shouldGamble(boardState, playable)) {
+			int index = gamble(playable);
+			knownColors.remove(index);
+			knownValues.remove(index);
+			knownValues.add(0);
+			knownColors.add(-1);
+			return playMsg(index);
+		}
 
 
 		//Discard first non 5 card
