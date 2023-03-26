@@ -1,8 +1,6 @@
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 /**
  * This is the only class you should edit.
@@ -203,12 +201,13 @@ public class Player {
 			if (colorHint) {
 				colorHint = false;
 				//Remove hinted number from known Cards and add replacement to back of hand
+				int color = knownColors.get(index);
+
 				knownColors.remove(index);
 				knownValues.remove(index);
 				knownValues.add(0);
 				knownColors.add(-1);
 
-				int color = knownColors.get(index);
 				if (boardState.tableau.get(color) != 5) {
 					// if the color isn't complete, then play
 					return playMsg(index);
@@ -220,6 +219,12 @@ public class Player {
 			if (numHint) {
 				numHint = false;
 				int value = knownValues.get(index);
+
+				knownColors.remove(index);
+				knownValues.remove(index);
+				knownValues.add(0);
+				knownColors.add(-1);
+
 				int playableSpots = 0;
 				for (int spot : boardState.tableau) {
 					playableSpots += (spot == value - 1) ? 1 : 0;
@@ -273,14 +278,14 @@ public class Player {
 		//TODO: Check if we should gamble
 		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
 
-		if (shouldGamble(boardState, playable)) {
-			int index = gamble(playable);
-			knownColors.remove(index);
-			knownValues.remove(index);
-			knownValues.add(0);
-			knownColors.add(-1);
-			return playMsg(index);
-		}
+		// if (shouldGamble(boardState, playable)) {
+		// 	int index = gamble(playable);
+		// 	knownColors.remove(index);
+		// 	knownValues.remove(index);
+		// 	knownValues.add(0);
+		// 	knownColors.add(-1);
+		// 	return playMsg(index);
+		// }
 
 
 		//Discard first non 5 card
@@ -441,7 +446,7 @@ public class Player {
 	}
 
 	private String hint(Board boardState, Hand partnerHand) throws Exception {
-		if (boardState.numFuses < 2) {
+		if (boardState.numFuses < 2 || boardState.numHints == 0) {
 			return "";
 		}
 
@@ -478,12 +483,16 @@ public class Player {
 		boolean playAllThrees = minTableau == maxTableau && minTableau == 2;
 
 
-		if (playAllOnes && partnerHandVals.contains(1)) {
+		if (playAllOnes && partnerHandVals.contains(1) && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
 			return numHintMsg(1);
-		} else if (playAllTwos && partnerHandVals.contains(2)) {
+		} else if (playAllTwos && partnerHandVals.contains(2) && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
 			return numHintMsg(2);
-		} else if (playAllThrees && partnerHandVals.contains(3)) {
+		} else if (playAllThrees && partnerHandVals.contains(3) && !hasHintedValue.get(partnerHandVals.indexOf(3))) {
 			return numHintMsg(3);
+		}
+
+		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
+			return numHintMsg(5);
 		}
 
 		int index = hasPlayableCard(partnerHandCards, boardState);
@@ -493,12 +502,18 @@ public class Player {
 		if (index != -1) {
 			Card playablePartnerCard = partnerHandCards.get(index);
 
-			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1) {
-				return numHintMsg(index);
-			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1) {
-				return colorHintMsg(index);
+			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedColor.get(index)) {
+				return numHintMsg(partnerHandVals.get(index));
+			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1 && !hasHintedValue.get(index)) {
+				return colorHintMsg(partnerHandColors.get(index));
 			}
 
+			//Just Hint it anyways, favoring hinting value
+			if (!hasHintedValue.get(index)) {
+				return numHintMsg(partnerHandVals.get(index));
+			} else if (!hasHintedColor.get(index)) {
+				return colorHintMsg(partnerHandColors.get(index));
+			}
 		}
 
 
