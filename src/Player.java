@@ -195,42 +195,42 @@ public class Player {
 		turn++;
 
 		if (wasHinted && numCardsChangedByHint == 1) {
+			wasHinted = false;
+			numCardsChangedByHint = 0;
+			int index = indexOfSingleCardHint;
+			indexOfSingleCardHint = -1;
 			//Was hinted only one color or value
 			if (colorHint) {
+				colorHint = false;
 				//Remove hinted number from known Cards and add replacement to back of hand
-				knownColors.remove(indexOfSingleCardHint);
-				knownValues.remove(indexOfSingleCardHint);
+				knownColors.remove(index);
+				knownValues.remove(index);
 				knownValues.add(0);
 				knownColors.add(-1);
 
-				int color = knownColors.get(indexOfSingleCardHint);
+				int color = knownColors.get(index);
 				if (boardState.tableau.get(color) != 5) {
 					// if the color isn't complete, then play
-					return playMsg(indexOfSingleCardHint);
+					return playMsg(index);
 				}
 				else {
-					return discardMsg(indexOfSingleCardHint);
+					return discardMsg(index);
 				}
 			}
 			if (numHint) {
-				int value = knownValues.get(indexOfSingleCardHint);
+				numHint = false;
+				int value = knownValues.get(index);
 				int playableSpots = 0;
 				for (int spot : boardState.tableau) {
 					playableSpots += (spot == value - 1) ? 1 : 0;
 				}
 				if (playableSpots > 0) {
-					return playMsg(indexOfSingleCardHint);
+					return playMsg(index);
 				}
 				else {
-					return discardMsg(indexOfSingleCardHint);
+					return discardMsg(index);
 				}
 			}
-
-			wasHinted = false;
-			numHint = false;
-			colorHint = false;
-			indexOfSingleCardHint = -1; // this should never be accessed when it is -1, just used for testing
-			numCardsChangedByHint = 0;
 		}
 
 		if (playableIndexes.size() != 0) {
