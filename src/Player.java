@@ -17,6 +17,7 @@ public class Player {
 	ArrayList<Boolean> hasHintedValue;
 	ArrayList<Integer> playableIndexes;
 	ArrayList<Integer> discardableIndexes;
+	ArrayList<Integer> lastHintIndices;
 	ArrayList<Card> deck;
 
 	boolean wasHinted, numHint, colorHint;
@@ -41,6 +42,7 @@ public class Player {
 		indexOfSingleCardHint = -1;
 		playableIndexes = new ArrayList<>();
 		discardableIndexes = new ArrayList<>();
+		lastHintIndices = new ArrayList<>();
 
 		//Make deck for counting cards
 		deck = new ArrayList<>();
@@ -135,6 +137,8 @@ public class Player {
 		colorHint = true;
 		if (numCardsChangedByHint == 1) {
 			indexOfSingleCardHint = indices.get(0);
+		} else {
+			lastHintIndices = indices;
 		}
 		for (Integer i : indices) {
 			knownColors.set(i, color);
@@ -155,6 +159,8 @@ public class Player {
 		numHint = true;
 		if (numCardsChangedByHint == 1) {
 			indexOfSingleCardHint = indices.get(0);
+		} else {
+			lastHintIndices = indices;
 		}
 		for (Integer i : indices) {
 			knownValues.set(i, number);
@@ -193,13 +199,13 @@ public class Player {
 		turn++;
 
 		if (wasHinted && numCardsChangedByHint == 1) {
-			wasHinted = false;
-			numCardsChangedByHint = 0;
-			int index = indexOfSingleCardHint;
-			indexOfSingleCardHint = -1;
+			wasHinted = false; //reset val
+			numCardsChangedByHint = 0; //reset val
+			int index = indexOfSingleCardHint; //store val locally, reset class
+			indexOfSingleCardHint = -1; //reset val
 			//Was hinted only one color or value
 			if (colorHint) {
-				colorHint = false;
+				colorHint = false; //reset val
 				//Remove hinted number from known Cards and add replacement to back of hand
 				int color = knownColors.get(index);
 
@@ -217,7 +223,7 @@ public class Player {
 				}
 			}
 			if (numHint) {
-				numHint = false;
+				numHint = false; //reset val
 				int value = knownValues.get(index);
 
 				knownColors.remove(index);
@@ -236,7 +242,50 @@ public class Player {
 					return discardMsg(index);
 				}
 			}
+		} else if (wasHinted) {
+			//Hinted more than 1 card
+			wasHinted = false;
+			int indexHinted = lastHintIndices.get(0);
+
+			if (colorHint) {
+				//color hint of more than 1 card
+				colorHint = false;
+
+				if (boardState.tableau.get(indexHinted) != 5) {
+					knownColors.remove(indexHinted);
+					knownValues.remove(indexHinted);
+					knownValues.add(0);
+					knownColors.add(-1);
+					return playMsg(indexHinted);
+				}
+
+			} else if (numHint) {
+				//number hint of more than 1 card
+				numHint = false;
+
+				int value = knownValues.get(indexHinted);
+
+				int playableSpots = 0;
+				for (int spot : boardState.tableau) {
+					playableSpots += (spot == value - 1) ? 1 : 0;
+				}
+
+				knownColors.remove(indexHinted);
+				knownValues.remove(indexHinted);
+				knownValues.add(0);
+				knownColors.add(-1);
+
+				if (playableSpots > 0) {
+					return playMsg(indexHinted);
+				}
+				else {
+					return discardMsg(indexHinted);
+				}
+			}
 		}
+
+
+
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
