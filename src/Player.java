@@ -242,49 +242,7 @@ public class Player {
 					return discardMsg(index);
 				}
 			}
-		} else if (wasHinted && boardState.numFuses > 1) {
-			//Hinted more than 1 card and can afford to lose a life
-			wasHinted = false;
-			int indexHinted = lastHintIndices.get(0);
-
-			if (colorHint) {
-				//color hint of more than 1 card
-				colorHint = false;
-
-				if (boardState.tableau.get(indexHinted) != 5) {
-					knownColors.remove(indexHinted);
-					knownValues.remove(indexHinted);
-					knownValues.add(0);
-					knownColors.add(-1);
-					return playMsg(indexHinted);
-				}
-
-			} else if (numHint) {
-				//number hint of more than 1 card
-				numHint = false;
-
-				int value = knownValues.get(indexHinted);
-
-				int playableSpots = 0;
-				for (int spot : boardState.tableau) {
-					playableSpots += (spot == value - 1) ? 1 : 0;
-				}
-
-				knownColors.remove(indexHinted);
-				knownValues.remove(indexHinted);
-				knownValues.add(0);
-				knownColors.add(-1);
-
-				if (playableSpots > 0) {
-					return playMsg(indexHinted);
-				}
-				else {
-					return discardMsg(indexHinted);
-				}
-			}
 		}
-
-
 
 
 		if (playableIndexes.size() != 0) {
@@ -561,7 +519,7 @@ public class Player {
 	}
 
 	private String hint(Board boardState, Hand partnerHand) throws Exception {
-		if (boardState.numFuses < 1 || boardState.numHints == 0) {
+		if (boardState.numHints == 0) {
 			return "";
 		}
 
@@ -589,24 +547,28 @@ public class Player {
 			partnerHandCards.add(c);
 		}
 
-		boolean discardOnes = minTableau > 0;
-		boolean discardTwos = minTableau > 1;
-		boolean discardThrees = minTableau > 2;
+		boolean discardOnes = minTableau > 0 && partnerHandVals.stream().filter(i -> i == 1).count() > 1;
+		boolean discardTwos = minTableau > 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 1;
+		boolean discardThrees = minTableau > 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 1;
 
-		boolean playAllOnes = maxTableau < 1;
-		boolean playAllTwos = minTableau == maxTableau && minTableau == 1;
-		boolean playAllThrees = minTableau == maxTableau && minTableau == 2;
+		boolean playAllOnes = maxTableau < 1 && partnerHandVals.stream().filter(i -> i == 1).count() > 1;
+		boolean playAllTwos = minTableau == maxTableau && minTableau == 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 1;
+		boolean playAllThrees = minTableau == maxTableau && minTableau == 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 1;
 
 		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
+			hasHintedValue.set(0, true);
 			return numHintMsg(5);
 		}
 
 		//Hint for all of one number
-		if (playAllOnes && partnerHandVals.contains(1) && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
+		if (playAllOnes && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
+			hasHintedValue.set(partnerHandVals.indexOf(1), true);
 			return numHintMsg(1);
-		} else if (playAllTwos && partnerHandVals.contains(2) && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
+		} else if (playAllTwos && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
+			hasHintedValue.set(partnerHandVals.indexOf(2), true);
 			return numHintMsg(2);
-		} else if (playAllThrees && partnerHandVals.contains(3) && !hasHintedValue.get(partnerHandVals.indexOf(3))) {
+		} else if (playAllThrees && !hasHintedValue.get(partnerHandVals.indexOf(3))) {
+			hasHintedValue.set(partnerHandVals.indexOf(3), true);
 			return numHintMsg(3);
 		}
 
@@ -616,26 +578,36 @@ public class Player {
 		if (index != -1) {
 			Card playablePartnerCard = partnerHandCards.get(index);
 
-			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedColor.get(index)) {
+			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedValue.get(index)) {
+				hasHintedValue.set(index, true);
 				return numHintMsg(partnerHandVals.get(index));
-			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1 && !hasHintedValue.get(index)) {
+			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1 && !hasHintedColor.get(index)) {
+				hasHintedColor.set(index, true);
 				return colorHintMsg(partnerHandColors.get(index));
 			}
 
 			//Just Hint it anyways, favoring hinting value
 			if (!hasHintedValue.get(index)) {
+				hasHintedValue.set(index, true);
 				return numHintMsg(partnerHandVals.get(index));
 			} else if (!hasHintedColor.get(index)) {
+				hasHintedColor.set(index, true);
 				return colorHintMsg(partnerHandColors.get(index));
 			}
 		}
 
+		if (boardState.numHints < 3) {
+			return "";
+		}
 
-		if (hasHintedValue.contains(true)) {
+
+		if (hasHintedValue.contains(true) && !hasHintedColor.get(hasHintedValue.indexOf(true))) {
 			//Have hinted values, need to hint colors
+			hasHintedColor.set(hasHintedValue.indexOf(true), true);
 			return colorHintMsg(partnerHandColors.get(hasHintedValue.indexOf(true)));
-		} else if (hasHintedColor.contains(true)) {
+		} else if (hasHintedColor.contains(true) && !hasHintedValue.get(hasHintedColor.indexOf(true))) {
 			//have hinted colors, need to hint values
+			hasHintedValue.set(hasHintedColor.indexOf(true), true);
 			return numHintMsg(partnerHandVals.get(hasHintedColor.indexOf(true)));
 		}
 
@@ -646,9 +618,23 @@ public class Player {
 		int biggestHintIndex = tuple.biggestHintIndex;
 
 		if (hintHum && biggestHint > 2 && !hasHintedValue.get(biggestHintIndex)) {
+			hasHintedValue.set(biggestHintIndex, true);
 			return numHintMsg(partnerHandVals.get(biggestHintIndex));
 		} else if (biggestHint > 2 && !hasHintedColor.get(biggestHintIndex)) {
+			hasHintedColor.set(biggestHintIndex, true);
 			return colorHintMsg(partnerHandColors.get(biggestHintIndex));
+		}
+
+		//Hint for all of one number for discard
+		if (discardOnes && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
+			hasHintedValue.set(partnerHandVals.indexOf(1), true);
+			return numHintMsg(1);
+		} else if (discardTwos && !hasHintedValue.get(partnerHandVals.indexOf(2))) {
+			hasHintedValue.set(partnerHandVals.indexOf(1), true);
+			return numHintMsg(2);
+		} else if (discardThrees && !hasHintedValue.get(partnerHandVals.indexOf(3))) {
+			hasHintedValue.set(partnerHandVals.indexOf(3), true);
+			return numHintMsg(3);
 		}
 
 
