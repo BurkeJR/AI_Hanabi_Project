@@ -236,7 +236,10 @@ public class Player {
 					playableSpots += (spot == value - 1) ? 1 : 0;
 				}
 				if (playableSpots > 0) {
-					return playMsg(index);
+					if (!(value == 5 && index == 0)) {
+						// don't play if we were told that it's a 5 that is about to be discarded
+						return playMsg(index);
+					}
 				}
 				else if (value != 5) {
 					return discardMsg(index);
