@@ -244,9 +244,9 @@ public class Player {
 
 
 		//TODO: Check if we should gamble
-
-
-
+		if (shouldGamble(boardState)) {
+			return playMsg(gamble(boardState));
+		}
 
 
 		//Discard first non 5 card
@@ -257,9 +257,11 @@ public class Player {
 			return discardMsg(i);
 		}
 
-		// Provided for testing purposes only; delete.
-		// Your method should construct and return a String without user input.
-		return scn.nextLine();
+		/* This statement will be reached only if we have no hints, no safely playable or discardable
+		 * cards, and we know that all of our cards are 5s. It is unlikely that this will happen, but 
+		 * we need to account for it so that we return something in that case. 
+		 */
+		return discardMsg(0);
 	}
 
 
@@ -328,6 +330,41 @@ public class Player {
 				}
 			}
 		}
+	}
+
+	private boolean shouldGamble(Board boardState) {
+		if (boardState.numFuses <= 1) {
+			// we don't have enough lives to gamble
+			return false;
+		}
+
+		if (boardState.deckSize < boardState.numFuses) {
+			/* There are less cards in the deck than fuses. 
+			 * So we should just play something since discarding will bring us closer
+			 * to the end of the game while not increasing our score. We can guess
+			 * without losing and have the possibility of gaining a point. 
+			 */
+			return true;
+		}
+
+		// get proportion of playable cards that will give us points to total playable cards
+
+		// if we have at least a 50% chance of getting a point from a guess, then gamble
+
+		return false;
+	}
+
+	/** 
+	 * returns the index of the card we should play on a gamble
+	 */
+	private int gamble(Board boardState) {
+		// get list of playable cards that will give us a point 
+
+		// find the chance of that each of our cards could be one of these cards 
+
+		// play the card with the highest chance. if tied, play the newest card (the one closer to the end)
+
+		return 0;
 	}
 
 	private String playMsg(int x) {
