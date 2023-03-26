@@ -404,15 +404,56 @@ public class Player {
 	/** 
 	 * returns the index of the card we should play on a gamble
 	 */
-	private int gamble(ArrayList<Card> playable) {
+	public int gamble(ArrayList<Card> playable) {
+		// chances of each of our cards being something playable 
+		double chances[] = {0, 0, 0, 0, 0};
+		
+		/*
+		* If we already know what some cards are, then remove them from playable since the other cards in
+		* our hand can't be those. If it could have been played, we wouldn't have gotten to gamble.
+		* So we can remove this card from our gamble candidates. 
+		*/
+		for (int card = 0; card < knownColors.size(); card++) {
+			if (knownColors.get(card) != -1 && knownValues.get(card) != 0) {
+				playable.remove(new Card(knownColors.get(card), knownValues.get(card)));
+				chances[card] = -1; // set to -1 so we know not to bother with this card 
+			}
+		}
+
 		// find the chance of that each of our cards could be one of the playable cards 
+		for (int card = 0; card < knownColors.size(); card++) {
+			// skip over cards we already know about 
+			if (chances[card] != -1) {
+				// we know the color
+				if (knownColors.get(card) != -1) {
+					// chance = number of next playable cards of this color / total number of playable cards of this color
+					chances[card] = countColorInList(knownColors.get(card), playable) / (countColorInList(knownColors.get(card), deck) + 0.0);
+				}
+				// we know the number
+				else if (knownValues.get(card) != 0) {
+					// chance = number of next playable cards of this number / total number of playable cards of this number
+					chances[card] = countValuesInList(knownValues.get(card), playable) / (countValuesInList(knownValues.get(card), deck) + 0.0);
+				}
+				// we know nothing about the card
+				else {
+					// chance = the number of playable cards / cards left in the deck
+					chances[card] = playable.size() / deck.size();
+				}
+			}
+		}
 
 		// play the card with the highest chance. if tied, play the newest card (the one closer to the end)
+		int max = 4;
+		for (int i = 3; i <= 0; i--) {
+			if (chances[i] > chances[max]) {
+				max = i;
+			}
+		}
 
-		return 0;
+		return max;
 	}
 
-	private ArrayList<Card> getPossiblePlayableCards(Board boardState) {
+	public ArrayList<Card> getPossiblePlayableCards(Board boardState) {
 		ArrayList<Card> playable = new ArrayList<>();
 
 		for (int color = 0; color < 5; color++) {
@@ -427,6 +468,26 @@ public class Player {
 		}
 
 		return playable;
+	}
+
+	private int countColorInList(int color, ArrayList<Card> list) {
+		int count = 0;
+		for (Card card : list) {
+			if (card.color == color) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private int countValuesInList(int value, ArrayList<Card> list) {
+		int count = 0;
+		for (Card card : list) {
+			if (card.value == value) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private String playMsg(int x) {
