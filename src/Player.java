@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 /**
  * This is the only class you should edit.
- * @author You
+ * @author Garrett Martin and John Burke
  *
  */
 public class Player {
@@ -23,10 +23,7 @@ public class Player {
 	boolean wasHinted, numHint, colorHint;
 	int numCardsChangedByHint, indexOfSingleCardHint;
 	int turn;
-	
-	// Delete this once you actually write your own version of the class.
-	private static Scanner scn = new Scanner(System.in);
-	
+
 	/**
 	 * This default constructor should be the only constructor you supply.
 	 */
@@ -60,7 +57,7 @@ public class Player {
 			deck.add(new Card(i, 5));
 		}
 
-		turn = 0; //Set turn to 0
+		turn = 0;
 	}
 	
 	/**
@@ -143,7 +140,6 @@ public class Player {
 		for (Integer i : indices) {
 			knownColors.set(i, color);
 		}
-
 	}
 	
 	/**
@@ -265,11 +261,6 @@ public class Player {
 		//TODO: check for any infrences (maybe done when we get hints or they play) so we can just use list above
 
 
-
-
-
-		//TODO: check for hintable cards
-
 		String hint = hint(boardState, partnerHand);//Return an empty string if no hint to give
 
 		if (!hint.equals("")) {
@@ -289,7 +280,6 @@ public class Player {
 		}
 
 
-		//TODO: Check if we should gamble
 		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
 
 		if (shouldGamble(boardState, playable)) {
@@ -429,14 +419,10 @@ public class Player {
 		}
 
 		// get proportion of playable cards that will give us points to total playable cards
-		int total = boardState.deckSize + 10; // 10 because each player has 5 cards
+		double total = boardState.deckSize + 10.0; // 10 because each player has 5 cards
 
 		// if we have at least a 50% chance of getting a point from a guess, then gamble
-		if (playable.size()/total >= 0.5) {
-			return true;
-		}
-
-		return false;
+		return playable.size() / total >= 0.5;
 	}
 
 	/** 
