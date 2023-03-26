@@ -238,7 +238,7 @@ public class Player {
 				if (playableSpots > 0) {
 					return playMsg(index);
 				}
-				else {
+				else if (value != 5) {
 					return discardMsg(index);
 				}
 			}
