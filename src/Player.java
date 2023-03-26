@@ -243,6 +243,9 @@ public class Player {
 				}
 			}
 		}
+		wasHinted = false;
+		colorHint = false;
+		numHint = false;
 
 
 		if (playableIndexes.size() != 0) {
