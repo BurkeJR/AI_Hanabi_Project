@@ -249,8 +249,14 @@ public class Player {
 
 
 
-
 		//TODO: check for hintable cards
+
+		String hint = hint(boardState, partnerHand);//Return an empty string if no hint to give
+
+		if (!hint.equals("")) {
+			return hint;
+		}
+
 
 		if (discardableIndexes.size() != 0) {
 			//Discard from here
@@ -431,6 +437,91 @@ public class Player {
 
 	private String numHintMsg(int x) {
 		return "NUMBERHINT " + x;
+	}
+
+	private String hint(Board boardState, Hand partnerHand) throws Exception {
+		if (boardState.numFuses < 2) {
+			return "";
+		}
+
+		int maxTableau = 0;
+		int minTableau = 5;
+
+		//Get max and mins
+		for (Integer i : boardState.tableau) {
+			if (i > maxTableau) {
+				maxTableau = i;
+			}
+			if (i < minTableau) {
+				minTableau = i;
+			}
+		}
+
+		ArrayList<Integer> partnerHandVals = new ArrayList<>();
+		ArrayList<Integer> partnerHandColors = new ArrayList<>();
+		ArrayList<Card> partnerHandCards = new ArrayList<>();
+
+		for (int i = 0; i < partnerHand.size(); i++) {
+			Card c = partnerHand.get(i);
+			partnerHandColors.add(c.color);
+			partnerHandVals.add(c.value);
+			partnerHandCards.add(c);
+		}
+
+		boolean discardOnes = minTableau > 0;
+		boolean discardTwos = minTableau > 1;
+		boolean discardThrees = minTableau > 2;
+
+		boolean playAllOnes = maxTableau < 1;
+		boolean playAllTwos = minTableau == maxTableau && minTableau == 1;
+		boolean playAllThrees = minTableau == maxTableau && minTableau == 2;
+
+
+		if (playAllOnes && partnerHandVals.contains(1)) {
+			return numHintMsg(1);
+		} else if (playAllTwos && partnerHandVals.contains(2)) {
+			return numHintMsg(2);
+		} else if (playAllThrees && partnerHandVals.contains(3)) {
+			return numHintMsg(3);
+		}
+
+		int index = hasPlayableCard(partnerHandCards, boardState);
+
+
+		//If can play card, check if have only 1;
+		if (index != -1) {
+			Card playablePartnerCard = partnerHandCards.get(index);
+
+			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1) {
+				return numHintMsg(index);
+			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1) {
+				return colorHintMsg(index);
+			}
+
+		}
+
+
+
+
+
+		return "";
+	}
+
+	/**
+	 * Used to check if partner has a card that is obviously playable and hintable directly
+	 * @param partnerCards list of cards in partners hand
+	 * @param boardState Board
+	 * @return index of playable card if can play, -1 otherwise
+	 */
+	private int hasPlayableCard(ArrayList<Card> partnerCards, Board boardState) {
+		for (int i = 0; i < boardState.tableau.size(); i++) {
+			Card c = new Card(i,boardState.tableau.get(i) + 1); //Gets the playable card for that color
+			if (partnerCards.contains(c)) {
+				return partnerCards.indexOf(c);
+			}
+		}
+
+		return -1;
 	}
 
 }
