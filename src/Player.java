@@ -480,23 +480,27 @@ public class Player {
 	}
 
 	private String playMsg(int x) {
+		System.out.println("PLAY " + x + " " + (knownColors.size() - 1));
 		return "PLAY " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String discardMsg(int x) {
+		System.out.println("DISCARD " + x + " " + (knownColors.size() - 1));
 		return "DISCARD " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String colorHintMsg(int x) {
+		System.out.println("COLORHINT " + x);
 		return "COLORHINT " + x;
 	}
 
 	private String numHintMsg(int x) {
+		System.out.println("NUMBERHINT " + x);
 		return "NUMBERHINT " + x;
 	}
 
 	private String hint(Board boardState, Hand partnerHand) throws Exception {
-		if (boardState.numFuses < 2 || boardState.numHints == 0) {
+		if (boardState.numFuses < 1 || boardState.numHints == 0) {
 			return "";
 		}
 
@@ -639,9 +643,6 @@ public class Player {
 
 
 	}
-
-
-
 
 
 	private class Tuple {
