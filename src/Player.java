@@ -502,22 +502,22 @@ public class Player {
 	}
 
 	private String playMsg(int x) {
-		System.out.println("PLAY " + x + " " + (knownColors.size() - 1));
+		//System.out.println("PLAY " + x + " " + (knownColors.size() - 1));
 		return "PLAY " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String discardMsg(int x) {
-		System.out.println("DISCARD " + x + " " + (knownColors.size() - 1));
+		//System.out.println("DISCARD " + x + " " + (knownColors.size() - 1));
 		return "DISCARD " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String colorHintMsg(int x) {
-		System.out.println("COLORHINT " + x);
+		//System.out.println("COLORHINT " + x);
 		return "COLORHINT " + x;
 	}
 
 	private String numHintMsg(int x) {
-		System.out.println("NUMBERHINT " + x);
+		//System.out.println("NUMBERHINT " + x);
 		return "NUMBERHINT " + x;
 	}
 
