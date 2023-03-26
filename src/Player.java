@@ -574,11 +574,17 @@ public class Player {
 			return numHintMsg(partnerHandVals.get(hasHintedColor.indexOf(true)));
 		}
 
+		Tuple tuple = getBigHint(partnerHandVals, partnerHandColors);
 
+		boolean hintHum = tuple.hintNum;
+		int biggestHint = tuple.biggestHint;
+		int biggestHintIndex = tuple.biggestHintIndex;
 
-
-
-
+		if (hintHum && biggestHint > 2 && !hasHintedValue.get(biggestHintIndex)) {
+			return numHintMsg(partnerHandVals.get(biggestHintIndex));
+		} else if (biggestHint > 2 && !hasHintedColor.get(biggestHintIndex)) {
+			return colorHintMsg(partnerHandColors.get(biggestHintIndex));
+		}
 
 
 		return "";
@@ -599,6 +605,55 @@ public class Player {
 		}
 
 		return -1;
+	}
+
+	private Tuple getBigHint(ArrayList<Integer> partnerHandVals, ArrayList<Integer> partnerHandColors) {
+		int[] valsSize = {0,0,0,0,0};
+		int[] colorSize = {0,0,0,0,0};
+
+		for (int i = 0; i < partnerHandColors.size(); i++) {
+			valsSize[partnerHandVals.get(i) - 1]++;
+			colorSize[partnerHandColors.get(i)]++;
+		}
+
+		int maxVal = -1;
+		int maxValIndex = 0;
+		int maxColor = -1;
+		int maxColorIndex = 0;
+
+		for (int i =0; i < valsSize.length; i++) {
+			if (valsSize[i] > maxVal) {
+				maxVal = valsSize[i];
+				maxValIndex = i;
+			}
+			if (colorSize[i] > maxColor) {
+				maxColor = colorSize[i];
+				maxColorIndex = i;
+			}
+		}
+
+		if (maxColor > maxVal) {
+			return new Tuple(false, maxVal, maxColorIndex);
+		}
+		return new Tuple(true, maxColor, maxValIndex);
+
+
+	}
+
+
+
+
+
+	private class Tuple {
+		public boolean hintNum;
+		public int biggestHint;
+
+		public int biggestHintIndex;
+		public Tuple (boolean hintNum, int biggestHint, int biggestHintIndex) {
+			this.hintNum = hintNum;
+			this.biggestHint = biggestHint;
+			this.biggestHintIndex = biggestHintIndex;
+		}
 	}
 
 }
