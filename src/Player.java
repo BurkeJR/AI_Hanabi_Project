@@ -242,8 +242,8 @@ public class Player {
 					return discardMsg(index);
 				}
 			}
-		} else if (wasHinted) {
-			//Hinted more than 1 card
+		} else if (wasHinted && boardState.numFuses > 1) {
+			//Hinted more than 1 card and can afford to lose a life
 			wasHinted = false;
 			int indexHinted = lastHintIndices.get(0);
 
@@ -282,6 +282,11 @@ public class Player {
 					return discardMsg(indexHinted);
 				}
 			}
+		} else {
+			//Reset bools
+			wasHinted = false;
+			numHint = false;
+			colorHint = false;
 		}
 
 
