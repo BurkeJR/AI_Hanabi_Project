@@ -197,6 +197,12 @@ public class Player {
 		if (wasHinted && numCardsChangedByHint == 1) {
 			//Was hinted only one color or value
 			if (colorHint) {
+				//Remove hinted number from known Cards and add replacement to back of hand
+				knownColors.remove(indexOfSingleCardHint);
+				knownValues.remove(indexOfSingleCardHint);
+				knownValues.add(0);
+				knownColors.add(-1);
+
 				int color = knownColors.get(indexOfSingleCardHint);
 				if (boardState.tableau.get(color) != 5) {
 					// if the color isn't complete, then play
@@ -229,17 +235,30 @@ public class Player {
 
 		if (playableIndexes.size() != 0) {
 			//Play from playables
-			return playMsg(playableIndexes.get(0));
+			int index = playableIndexes.get(0);
+			knownColors.remove(index);
+			knownValues.remove(index);
+			knownValues.add(0);
+			knownColors.add(-1);
+			return playMsg(index);
 			//Just play nearest thing in playables
 		}
 
 		//TODO: check for any infrences (maybe done when we get hints or they play) so we can just use list above
 
 
+
+
+
 		//TODO: check for hintable cards
 
 		if (discardableIndexes.size() != 0) {
 			//Discard from here
+			int index = discardableIndexes.get(0);
+			knownColors.remove(index);
+			knownValues.remove(index);
+			knownValues.add(0);
+			knownColors.add(-1);
 			return discardMsg(discardableIndexes.get(0));
 			//Discard nearest thing in discardables
 		}
@@ -247,7 +266,12 @@ public class Player {
 
 		//TODO: Check if we should gamble
 		if (shouldGamble(boardState)) {
-			return playMsg(gamble(boardState));
+			int index = gamble(boardState);
+			knownColors.remove(index);
+			knownValues.remove(index);
+			knownValues.add(0);
+			knownColors.add(-1);
+			return playMsg(index);
 		}
 
 
@@ -256,6 +280,10 @@ public class Player {
 			if (knownValues.get(i) == 5) {
 				continue;
 			}
+			knownColors.remove(i);
+			knownValues.remove(i);
+			knownValues.add(0);
+			knownColors.add(-1);
 			return discardMsg(i);
 		}
 
