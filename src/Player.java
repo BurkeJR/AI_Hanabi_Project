@@ -23,7 +23,7 @@ public class Player {
 	boolean wasHinted, numHint, colorHint;
 	int numCardsChangedByHint, indexOfSingleCardHint;
 	int turn;
-	
+
 	/**
 	 * This default constructor should be the only constructor you supply.
 	 */
@@ -184,8 +184,6 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) throws Exception {
-		infer(boardState);
-
 		if (turn == 0) {
 			//Only runs on first turn, removes all cards from our deck in partner's hand
 			for (int i = 0; i < 5; i++) {
@@ -193,6 +191,8 @@ public class Player {
 			}
 		}
 		turn++;
+
+		infer(boardState);
 
 		if (wasHinted && numCardsChangedByHint == 1) {
 			wasHinted = false; //reset val
