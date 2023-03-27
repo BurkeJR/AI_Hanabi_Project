@@ -351,6 +351,16 @@ public class Player {
 			}
 		}
 
+		// adds index of all colors that are completed
+		for (int i = 0; i < knownColors.size(); i++) {
+			if (knownColors.get(i) == -1) {
+				continue;
+			}
+			if (boardState.tableau.get(knownColors.get(i)) == 5) {
+				discardableIndexes.add(i);
+			}
+		}
+
 
 		//Goes through each color on tableau
 		//Loops through what we know of hand
