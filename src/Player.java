@@ -190,6 +190,7 @@ public class Player {
 		}
 		turn++;
 
+		// find cards that we can definitely play or discard
 		infer(boardState);
 
 		if (wasHinted && numCardsChangedByHint == 1 && boardState.numFuses > 1) {
@@ -333,11 +334,11 @@ public class Player {
 		playableIndexes.clear();
 		discardableIndexes.clear();
 
+		//Get minimum value in tableau
 		int minTableau = 5;
 		for (Integer i : boardState.tableau) {
 			minTableau = i < minTableau ? i : minTableau;
 		}
-		//Get minimum value in tableau
 
 
 		//Adds index of all values where the known value is <= minimum tableau value
@@ -411,6 +412,7 @@ public class Player {
 			}
 		}
 
+		// check if all of the cards in the tableau are 1s, and then if we have any 2s to play
 		int numOnes = 0;
 		for (int i = 0; i < boardState.tableau.size(); i++) {
 			if (boardState.tableau.get(i) == 1) {
@@ -505,6 +507,11 @@ public class Player {
 		return max;
 	}
 
+	/**
+	 * returns a list of the valid cards that could be played on each color
+	 * @param boardState
+	 * @return
+	 */
 	public ArrayList<Card> getPossiblePlayableCards(Board boardState) {
 		ArrayList<Card> playable = new ArrayList<>();
 
@@ -522,6 +529,12 @@ public class Player {
 		return playable;
 	}
 
+	/**
+	 * returns a list of cards that are the given color within the given list
+	 * @param color
+	 * @param list
+	 * @return
+	 */
 	private int countColorInList(int color, ArrayList<Card> list) {
 		int count = 0;
 		for (Card card : list) {
@@ -532,6 +545,12 @@ public class Player {
 		return count;
 	}
 
+	/**
+	 * returns a list of cards that are the given value within the given list
+	 * @param value
+	 * @param list
+	 * @return
+	 */
 	private int countValuesInList(int value, ArrayList<Card> list) {
 		int count = 0;
 		for (Card card : list) {
@@ -543,22 +562,18 @@ public class Player {
 	}
 
 	private String playMsg(int x) {
-		//System.out.println("PLAY " + x + " " + (knownColors.size() - 1));
 		return "PLAY " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String discardMsg(int x) {
-		//System.out.println("DISCARD " + x + " " + (knownColors.size() - 1));
 		return "DISCARD " + x + " " + (knownColors.size() - 1);
 	}
 
 	private String colorHintMsg(int x) {
-		//System.out.println("COLORHINT " + x);
 		return "COLORHINT " + x;
 	}
 
 	private String numHintMsg(int x) {
-		//System.out.println("NUMBERHINT " + x);
 		return "NUMBERHINT " + x;
 	}
 
