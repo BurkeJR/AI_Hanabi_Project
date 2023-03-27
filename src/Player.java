@@ -468,7 +468,7 @@ public class Player {
 	 */
 	public int gamble(ArrayList<Card> playable) {
 		// chances of each of our cards being something playable 
-		double chances[] = {0, 0, 0, 0, 0};
+		double[] chances = {0, 0, 0, 0, 0};
 		
 		/*
 		* If we already know what some cards are, then remove them from playable since the other cards in
@@ -489,24 +489,24 @@ public class Player {
 				// we know the color
 				if (knownColors.get(card) != -1) {
 					// chance = number of next playable cards of this color / total number of playable cards of this color
-					chances[card] = countColorInList(knownColors.get(card), playable) / (countColorInList(knownColors.get(card), deck) + 0.0);
+					chances[card] = ((double)countColorInList(knownColors.get(card), playable)) / (countColorInList(knownColors.get(card), deck) + 0.0);
 				}
 				// we know the number
 				else if (knownValues.get(card) != 0) {
 					// chance = number of next playable cards of this number / total number of playable cards of this number
-					chances[card] = countValuesInList(knownValues.get(card), playable) / (countValuesInList(knownValues.get(card), deck) + 0.0);
+					chances[card] =	((double)countValuesInList(knownValues.get(card), playable)) / (countValuesInList(knownValues.get(card), deck) + 0.0);
 				}
 				// we know nothing about the card
 				else {
 					// chance = the number of playable cards / cards left in the deck
-					chances[card] = playable.size() / deck.size();
+					chances[card] = ((double)playable.size()) / deck.size();
 				}
 			}
 		}
 
 		// play the card with the highest chance. if tied, play the newest card (the one closer to the end)
 		int max = 4;
-		for (int i = 3; i <= 0; i--) {
+		for (int i = 3; i >= 0; i--) {
 			if (chances[i] > chances[max]) {
 				max = i;
 			}
