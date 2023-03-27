@@ -577,7 +577,15 @@ public class Player {
 		return "NUMBERHINT " + x;
 	}
 
+	/**
+	 * Returns a String containing a hint if a good hint can be given
+	 * @param boardState input Board
+	 * @param partnerHand Hand of partner to determine hints for
+	 * @return "" if no hint can be given, else returns hint message
+	 * @throws Exception exception
+	 */
 	private String hint(Board boardState, Hand partnerHand) throws Exception {
+		//Cant hint if no hints available
 		if (boardState.numHints == 0) {
 			return "";
 		}
@@ -585,7 +593,7 @@ public class Player {
 		int maxTableau = 0;
 		int minTableau = 5;
 
-		//Get max and mins
+		//Get max and mins in tableau
 		for (Integer i : boardState.tableau) {
 			if (i > maxTableau) {
 				maxTableau = i;
@@ -599,6 +607,7 @@ public class Player {
 		ArrayList<Integer> partnerHandColors = new ArrayList<>();
 		ArrayList<Card> partnerHandCards = new ArrayList<>();
 
+		//Fill lists with values from partnerHand
 		for (int i = 0; i < partnerHand.size(); i++) {
 			Card c = partnerHand.get(i);
 			partnerHandColors.add(c.color);
@@ -606,14 +615,17 @@ public class Player {
 			partnerHandCards.add(c);
 		}
 
-		boolean discardOnes = minTableau > 0 && partnerHandVals.stream().filter(i -> i == 1).count() > 1;
-		boolean discardTwos = minTableau > 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 1;
-		boolean discardThrees = minTableau > 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 1;
+		//Determine if we can discard large number of cards
+		boolean discardOnes = minTableau > 0 && partnerHandVals.stream().filter(i -> i == 1).count() > 2;
+		boolean discardTwos = minTableau > 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 2;
+		boolean discardThrees = minTableau > 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 2;
 
-		boolean playAllOnes = maxTableau < 1 && partnerHandVals.stream().filter(i -> i == 1).count() > 1;
-		boolean playAllTwos = minTableau == maxTableau && minTableau == 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 1;
-		boolean playAllThrees = minTableau == maxTableau && minTableau == 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 1;
+		//Determine if we can play large number of 1's,2's, or 3's
+		boolean playAllOnes = maxTableau < 1 && partnerHandVals.stream().filter(i -> i == 1).count() > 2;
+		boolean playAllTwos = minTableau == maxTableau && minTableau == 1 && partnerHandVals.stream().filter(i -> i == 2).count() > 2;
+		boolean playAllThrees = minTableau == maxTableau && minTableau == 2 && partnerHandVals.stream().filter(i -> i == 3).count() > 2;
 
+		//If there is a 5 in partner's discard spot, hint it
 		if (partnerHandVals.contains(5) && partnerHandVals.indexOf(5) == 0 && !hasHintedValue.get(0)) {
 			hasHintedValue.set(0, true);
 			return numHintMsg(5);
@@ -631,16 +643,19 @@ public class Player {
 			return numHintMsg(3);
 		}
 
+		//Get indices of cards that can be played
 		ArrayList<Integer> indices = hasPlayableCard(partnerHandCards, boardState);
 
 		//If can play card, check if have only 1;
 		for (int index : indices) {
 			Card playablePartnerCard = partnerHandCards.get(index);
 
-			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedValue.get(index)) {
+			//Card is only one of that value, then hint it
+			if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1 && !hasHintedValue.get(index)) {
 				hasHintedValue.set(index, true);
 				return numHintMsg(partnerHandVals.get(index));
-			} else if (partnerHandVals.stream().filter(i -> i == playablePartnerCard.value).count() == 1 && !hasHintedColor.get(index)) {
+			} else if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedColor.get(index)) {
+				//Card is only one of that color, hint it
 				hasHintedColor.set(index, true);
 				return colorHintMsg(partnerHandColors.get(index));
 			}
@@ -655,7 +670,8 @@ public class Player {
 			}
 		}
 
-		if (boardState.numHints < 3) {
+		//More broad hints, so return no hint if low on hints
+		if (boardState.numHints < 2) {
 			return "";
 		}
 
@@ -670,21 +686,7 @@ public class Player {
 			return numHintMsg(partnerHandVals.get(hasHintedColor.indexOf(true)));
 		}
 
-		Tuple tuple = getBigHint(partnerHandVals, partnerHandColors);
-
-		boolean hintHum = tuple.hintNum;
-		int biggestHint = tuple.biggestHint;
-		int biggestHintIndex = tuple.biggestHintIndex;
-
-		if (hintHum && biggestHint > 2 && !hasHintedValue.get(biggestHintIndex)) {
-			hasHintedValue.set(biggestHintIndex, true);
-			return numHintMsg(partnerHandVals.get(biggestHintIndex));
-		} else if (biggestHint > 2 && !hasHintedColor.get(biggestHintIndex)) {
-			hasHintedColor.set(biggestHintIndex, true);
-			return colorHintMsg(partnerHandColors.get(biggestHintIndex));
-		}
-
-		//Hint for all of one number for discard
+		//Hint for all 1's, 2's, or 3's to discard them
 		if (discardOnes && !hasHintedValue.get(partnerHandVals.indexOf(1))) {
 			hasHintedValue.set(partnerHandVals.indexOf(1), true);
 			return numHintMsg(1);
@@ -697,6 +699,7 @@ public class Player {
 		}
 
 
+		//Return no hint
 		return "";
 	}
 
@@ -717,51 +720,4 @@ public class Player {
 
 		return indices;
 	}
-
-	private Tuple getBigHint(ArrayList<Integer> partnerHandVals, ArrayList<Integer> partnerHandColors) {
-		int[] valsSize = {0,0,0,0,0};
-		int[] colorSize = {0,0,0,0,0};
-
-		for (int i = 0; i < partnerHandColors.size(); i++) {
-			valsSize[partnerHandVals.get(i) - 1]++;
-			colorSize[partnerHandColors.get(i)]++;
-		}
-
-		int maxVal = -1;
-		int maxValIndex = 0;
-		int maxColor = -1;
-		int maxColorIndex = 0;
-
-		for (int i =0; i < valsSize.length; i++) {
-			if (valsSize[i] > maxVal) {
-				maxVal = valsSize[i];
-				maxValIndex = i;
-			}
-			if (colorSize[i] > maxColor) {
-				maxColor = colorSize[i];
-				maxColorIndex = i;
-			}
-		}
-
-		if (maxColor > maxVal) {
-			return new Tuple(false, maxVal, maxColorIndex);
-		}
-		return new Tuple(true, maxColor, maxValIndex);
-
-
-	}
-
-
-	private class Tuple {
-		public boolean hintNum;
-		public int biggestHint;
-
-		public int biggestHintIndex;
-		public Tuple (boolean hintNum, int biggestHint, int biggestHintIndex) {
-			this.hintNum = hintNum;
-			this.biggestHint = biggestHint;
-			this.biggestHintIndex = biggestHintIndex;
-		}
-	}
-
 }
