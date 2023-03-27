@@ -211,10 +211,7 @@ public class Player {
 				if (boardState.tableau.get(color) != 5) {
 					// if the color isn't complete, then play
 					return playMsg(index);
-				}/*
-				else {
-					return discardMsg(index);
-				}*/
+				}
 			}
 			if (numHint) {
 				numHint = false; //reset val
@@ -234,10 +231,7 @@ public class Player {
 						// don't play if we were told that it's a 5 that is about to be discarded
 						return playMsg(index);
 					}
-				}/*
-				else if (value != 5) {
-					return discardMsg(index);
-				}*/
+				}
 			}
 		}
 		wasHinted = false;
@@ -256,27 +250,12 @@ public class Player {
 			//Just play nearest thing in playables
 		}
 
-		//TODO: check for any infrences (maybe done when we get hints or they play) so we can just use list above
-
 
 		String hint = hint(boardState, partnerHand);//Return an empty string if no hint to give
 
 		if (!hint.equals("")) {
 			return hint;
 		}
-
-
-		if (discardableIndexes.size() != 0 && boardState.numHints < 1) {
-			//Discard from here
-			int index = discardableIndexes.get(0);
-			knownColors.remove(index);
-			knownValues.remove(index);
-			knownValues.add(0);
-			knownColors.add(-1);
-			return discardMsg(discardableIndexes.get(0));
-			//Discard nearest thing in discardables
-		}
-
 
 		ArrayList<Card> playable = getPossiblePlayableCards(boardState);
 
@@ -287,6 +266,17 @@ public class Player {
 			knownValues.add(0);
 			knownColors.add(-1);
 			return playMsg(index);
+		}
+
+		if (discardableIndexes.size() != 0 && boardState.numHints < 1) {
+			//Discard from here
+			int index = discardableIndexes.get(0);
+			knownColors.remove(index);
+			knownValues.remove(index);
+			knownValues.add(0);
+			knownColors.add(-1);
+			return discardMsg(discardableIndexes.get(0));
+			//Discard nearest thing in discardables
 		}
 
 
