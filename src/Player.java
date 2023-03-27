@@ -268,7 +268,7 @@ public class Player {
 		}
 
 
-		if (discardableIndexes.size() != 0 && boardState.numHints < 4) {
+		if (discardableIndexes.size() != 0 && boardState.numHints < 1) {
 			//Discard from here
 			int index = discardableIndexes.get(0);
 			knownColors.remove(index);
