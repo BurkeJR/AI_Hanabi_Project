@@ -387,14 +387,14 @@ public class Player {
 		}
 
 		// checks if we know that any of our cards are 1s, and if it is safe to play any of them
-		boolean tableauIsEmpty = true;
+		int numZeros = 0;
 		for (int i = 0; i < boardState.tableau.size(); i++) {
-			if (boardState.tableau.get(i) != 0) {
-				tableauIsEmpty = false;
+			if (boardState.tableau.get(i) == 0) {
+				numZeros++;
 			}
 		}
 
-		if (tableauIsEmpty) {
+		if ((numZeros == 5) || (numZeros == 4 && boardState.numFuses > 1)) {
 			for (int i = 0; i < knownValues.size(); i++) {
 				if (knownValues.get(i) == 1 && !(playableIndexes.contains(i))) {
 					playableIndexes.add(i);
