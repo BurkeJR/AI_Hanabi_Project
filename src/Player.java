@@ -269,7 +269,7 @@ public class Player {
 			return playMsg(index);
 		}
 
-		if (discardableIndexes.size() != 0 && boardState.numHints < 1) {
+		if (discardableIndexes.size() != 0) {
 			//Discard from here
 			int index = discardableIndexes.get(0);
 			knownColors.remove(index);
