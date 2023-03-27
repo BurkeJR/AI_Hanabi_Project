@@ -394,14 +394,7 @@ public class Player {
 			}
 		}
 
-		if (numZeros == 5) {
-			for (int i = 0; i < knownValues.size(); i++) {
-				if (knownValues.get(i) == 1 && !(playableIndexes.contains(i))) {
-					playableIndexes.add(i);
-				}
-			}
-		}
-		else if (numZeros == 4 && boardState.numFuses > 1) {
+		if ((numZeros == 5) || (numZeros == 4 && boardState.numFuses > 1)) {
 			for (int i = 0; i < knownValues.size(); i++) {
 				if (knownValues.get(i) == 1 && !(playableIndexes.contains(i))) {
 					playableIndexes.add(i);
