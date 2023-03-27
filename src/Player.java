@@ -1,7 +1,5 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
+
 /**
  * This is the only class you should edit.
  * @author Garrett Martin and John Burke
@@ -213,10 +211,10 @@ public class Player {
 				if (boardState.tableau.get(color) != 5) {
 					// if the color isn't complete, then play
 					return playMsg(index);
-				}
+				}/*
 				else {
 					return discardMsg(index);
-				}
+				}*/
 			}
 			if (numHint) {
 				numHint = false; //reset val
@@ -231,15 +229,15 @@ public class Player {
 				for (int spot : boardState.tableau) {
 					playableSpots += (spot == value - 1) ? 1 : 0;
 				}
-				if (playableSpots > 0) {
+				if (playableSpots > 0 && knownColors.get(index) == -1) {
 					if (!(value == 5 && index == 0)) {
 						// don't play if we were told that it's a 5 that is about to be discarded
 						return playMsg(index);
 					}
-				}
+				}/*
 				else if (value != 5) {
 					return discardMsg(index);
-				}
+				}*/
 			}
 		}
 		wasHinted = false;
@@ -294,17 +292,28 @@ public class Player {
 
 		//Discard first non 5 card
 		for (int i = 0; i < knownValues.size(); i++) {
-			if (knownValues.get(i) == 5) {
+			int val = knownValues.get(i);
+			int color = knownColors.get(i);
+			if (val == 5) {
 				continue;
 			}
-			if (knownValues.get(i) != 0 && knownColors.get(i) != -1) {
+			if (val != 0 && color != -1) {
 				//We know both of this ones values
-				if (deck.contains(new Card(knownColors.get(i), knownValues.get(i)))) {
+				if (deck.contains(new Card(color, val))) {
 					//Discard deck already contains this Card
 					//So skip it
 					continue;
 				}
 			}
+			if (val != 0) {
+
+				if (deck.stream().filter(c -> c.value == val).count() > 5 && val != 1) {
+					//More than half of this value are in the deck.
+					continue;
+				}
+			}
+
+
 			knownColors.remove(i);
 			knownValues.remove(i);
 			knownValues.add(0);
@@ -375,8 +384,8 @@ public class Player {
 				if (knownColors.get(j) != i) {
 					continue;
 				}
-				//Same color
 
+				//Same color
 				if (knownValues.get(j) == -1) {
 					//We only know color
 					continue;
@@ -404,7 +413,22 @@ public class Player {
 			}
 		}
 
-		if ((numZeros == 5) || (numZeros == 4 && boardState.numFuses > 1)) {
+		if ((numZeros == 5) || (numZeros == 4 && boardState.numFuses > 2)) {
+			for (int i = 0; i < knownValues.size(); i++) {
+				if (knownValues.get(i) == 1 && !(playableIndexes.contains(i))) {
+					playableIndexes.add(i);
+				}
+			}
+		}
+
+		int numOnes = 0;
+		for (int i = 0; i < boardState.tableau.size(); i++) {
+			if (boardState.tableau.get(i) == 1) {
+				numOnes++;
+			}
+		}
+
+		if ((numOnes == 5)) {
 			for (int i = 0; i < knownValues.size(); i++) {
 				if (knownValues.get(i) == 1 && !(playableIndexes.contains(i))) {
 					playableIndexes.add(i);
