@@ -194,7 +194,7 @@ public class Player {
 
 		infer(boardState);
 
-		if (wasHinted && numCardsChangedByHint == 1) {
+		if (wasHinted && numCardsChangedByHint == 1 && boardState.numFuses > 1) {
 			wasHinted = false; //reset val
 			numCardsChangedByHint = 0; //reset val
 			int index = indexOfSingleCardHint; //store val locally, reset class
@@ -409,6 +409,10 @@ public class Player {
 			return false;
 		}
 
+		if (boardState.numFuses == 3 && boardState.numHints == 8) {
+			return true;
+		}
+
 		if (boardState.deckSize < boardState.numFuses) {
 			/* There are less cards in the deck than fuses. 
 			 * So we should just play something since discarding will bring us closer
@@ -588,10 +592,10 @@ public class Player {
 			return numHintMsg(3);
 		}
 
-		int index = hasPlayableCard(partnerHandCards, boardState);
+		ArrayList<Integer> indices = hasPlayableCard(partnerHandCards, boardState);
 
 		//If can play card, check if have only 1;
-		if (index != -1) {
+		for (int index : indices) {
 			Card playablePartnerCard = partnerHandCards.get(index);
 
 			if (partnerHandColors.stream().filter(i -> i == playablePartnerCard.color).count() == 1 && !hasHintedValue.get(index)) {
@@ -663,15 +667,16 @@ public class Player {
 	 * @param boardState Board
 	 * @return index of playable card if can play, -1 otherwise
 	 */
-	private int hasPlayableCard(ArrayList<Card> partnerCards, Board boardState) {
+	private ArrayList<Integer> hasPlayableCard(ArrayList<Card> partnerCards, Board boardState) {
+		ArrayList<Integer> indices = new ArrayList<>();
 		for (int i = 0; i < boardState.tableau.size(); i++) {
 			Card c = new Card(i,boardState.tableau.get(i) + 1); //Gets the playable card for that color
 			if (partnerCards.contains(c)) {
-				return partnerCards.indexOf(c);
+				indices.add(partnerCards.indexOf(c));
 			}
 		}
 
-		return -1;
+		return indices;
 	}
 
 	private Tuple getBigHint(ArrayList<Integer> partnerHandVals, ArrayList<Integer> partnerHandColors) {
